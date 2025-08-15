@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story Camera with Frame</title>
+<style>
+    body {
+        margin: 0;
+        background: black;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    #camera-container {
+        position: relative;
+        max-width: 100vw;
+        max-height: 100vh;
+        aspect-ratio: 9/16;
+    }
+    video, canvas, #frame {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* biar gak ke-zoom */
+        background: black;
+    }
+    #frame {
+        pointer-events: none;
+        z-index: 5;
+    }
+    #capture-btn {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        background: white;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        z-index: 10;
+    }
+</style>
+</head>
+<body>
+
+<div id="camera-container">
+    <video id="video" autoplay playsinline></video>
+    <img id="frame" src="STORY PHOTO FRAME FUNWALK BANDARA.png" alt="Frame">
+    <button id="capture-btn">📸 Ambil Foto</button>
+    <canvas id="canvas" style="display:none;"></canvas>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const ctx = canvas.getContext('2d');
+    const frame = document.getElementById('frame');
+
+    // Akses kamera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(err => {
+            console.error("Tidak bisa mengakses kamera:", err);
+        });
+
+    // Capture foto dengan frame
+    captureBtn.addEventListener('click', () => {
+        // Set ukuran canvas sesuai video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+
+        const dataURL = canvas.toDataURL("image/png");
+
+        // Download otomatis
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'story-foto.png';
+        link.click();
+    });
+</script>
+
+</body>
+</html>
